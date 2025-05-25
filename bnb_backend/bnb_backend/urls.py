@@ -8,7 +8,3 @@ urlpatterns = [
     path('api/properties/',include('property.urls')),
     path('api/auth/',include('useraccount.urls')),
 ] + static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)
-
-# STATIC_URL = 'static/'
-# MEDIA_URL = 'media/'
-# MEDIA_ROOT = BASE_DIR / 'media'
