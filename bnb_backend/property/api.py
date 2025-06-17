@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 # from rest_framework_simplejwt.tokens import AccessToken
 from .forms import PropertyForm
 from .models import Property, Reservation
-from .serializers import PropertiesListSerializers, PropertyDetailSerializers, ReservationsListSerializer
+from .serializers import PropertiesListSerializer, PropertiesDetailSerializer, ReservationsListSerializer
 
 @api_view(['GET'])
 @authentication_classes([])
@@ -20,7 +20,7 @@ def properties_list(request):
     
     #
     #
-    serializer = PropertiesListSerializers(properties,many=True)
+    serializer = PropertiesListSerializer(properties,many=True)
     
     return JsonResponse({
         'data':serializer.data
@@ -34,7 +34,7 @@ def properties_list(request):
 def property_detail(request, pk):
     property = Property.objects.get(pk=pk)
     
-    serializer = PropertyDetailSerializers(property, many=False)
+    serializer = PropertiesDetailSerializer(property, many=False)
     
     return JsonResponse(serializer.data)
 
@@ -61,7 +61,7 @@ def create_property(request):
         property = form.save(commit=False)
         property.landlord = request.user
         property.save()
-        serializer = PropertiesListSerializers(property)
+        serializer = PropertiesListSerializer(property)
         
         return JsonResponse({'success': True})
     else:
