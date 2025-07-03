@@ -5,22 +5,20 @@ from .models import User
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     model = User
-    list_display = ("email", "name", "is_staff", "is_superuser", "is_active")
-    list_filter = ("is_staff", "is_superuser", "is_active")
+    ordering = ('email',)
+    list_display = ('email', 'is_staff', 'is_active','name')  # update based on your model
+    search_fields = ('email',)
+    readonly_fields = ('date_joined',)
 
     fieldsets = (
-        (None, {"fields": ("email", "password")}),
-        ("Personal Info", {"fields": ("name", "avatar")}),
-        ("Permissions", {"fields": ("is_staff", "is_superuser", "is_active", "groups", "user_permissions")}),
-        ("Important dates", {"fields": ("last_login", "date_joined")}),
+        (None, {'fields': ('email', 'password','name')}),
+        ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
 
     add_fieldsets = (
         (None, {
-            "classes": ("wide",),
-            "fields": ("email", "name", "avatar", "password1", "password2", "is_staff", "is_superuser", "is_active"),
-        }),
+            'classes': ('wide',),
+            'fields': ('email', 'password1', 'password2', 'is_staff', 'is_active')}
+        ),
     )
-
-    search_fields = ("email", "name")  # ✅ Required by DRF TokenAdmin
-    ordering = ("email",)
