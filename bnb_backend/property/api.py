@@ -25,8 +25,6 @@ def properties_list(request):
     
     # 
     # 
-    print(request.user)
-    print(request.auth)
 
     favorites = []
     properties = Property.objects.all()
@@ -36,28 +34,64 @@ def properties_list(request):
     
     is_favorites = request.GET.get('is_favorites', '')
     landlord_id = request.GET.get('landlord_id', '')
-    if landlord_id:
-        properties = properties.filter(landlord__id=landlord_id)
+
+    country = request.GET.get('country', '')
+    category = request.GET.get('category', '')
+    checkin_date = request.GET.get('checkIn', '')
+    checkout_date = request.GET.get('checkOut', '')
+    bedrooms = request.GET.get('numBedrooms', '')
+    guests = request.GET.get('numGuests', '')
+    bathrooms = request.GET.get('numBathrooms', '')
+    
+    print('country', country)
+
+    if checkin_date and checkout_date:
+        exact_matches = Reservation.objects.filter(start_date=checkin_date) | Reservation.objects.filter(end_date=checkout_date)
+        overlap_matches = Reservation.objects.filter(start_date__lte=checkout_date, end_date__gte=checkin_date)
+        all_matches = []
+
+        for reservation in exact_matches | overlap_matches:
+            all_matches.append(reservation.property_id)
         
+        properties = properties.exclude(id__in=all_matches)
+
+    if landlord_id:
+        properties = properties.filter(landlord_id=landlord_id)
 
     if is_favorites:
         properties = properties.filter(favorited__in=[user])
     
+    if guests:
+        properties = properties.filter(guests__gte=guests)
+    
+    if bedrooms:
+        properties = properties.filter(bedrooms__gte=bedrooms)
+    
+    if bathrooms:
+        properties = properties.filter(bathrooms__gte=bathrooms)
+    
+    if country:
+        properties = properties.filter(country=country)
+    
+    if category and category != 'undefined':
+        properties = properties.filter(category=category)
+    
     #
-    #Favorite
-    
-    if user:
-            for property in properties:
-                if user in property.favorited.all():
-                    favorites.append(property.id)
+    # Favorites
         
-    print('favorites', favorites)
-    
-    serializer = PropertiesListSerializer(properties,many=True)
-    
+    if user:
+        for property in properties:
+            if user in property.favorited.all():
+                favorites.append(property.id)
+
+    #
+    #
+
+    serializer = PropertiesListSerializer(properties, many=True)
+
     return JsonResponse({
-        'data':serializer.data,
-        'favorites': favorites,
+        'data': serializer.data,
+        'favorites': favorites
     })
 
 
